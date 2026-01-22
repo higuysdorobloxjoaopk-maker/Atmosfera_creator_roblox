@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Gerador de Atmosfera Roblox</title>
+
+<style>
+body{
+    background:#0b0f14;
+    color:#e6e6e6;
+    font-family:Arial,Helvetica,sans-serif;
+    padding:20px
+}
+h1{color:#4cff4c}
+.box{
+    background:#121823;
+    border-radius:12px;
+    padding:16px;
+    margin-bottom:18px
+}
+label{display:block;margin-top:10px;font-size:14px}
+input{
+    width:100%;
+    margin-top:4px;
+    padding:8px;
+    border-radius:8px;
+    border:none;
+    background:#1c2333;
+    color:#fff
+}
+input[type=color]{height:36px;padding:2px}
+button{
+    background:#4cff4c;
+    color:#000;
+    font-weight:bold;
+    border:none;
+    padding:12px 20px;
+    border-radius:12px;
+    cursor:pointer;
+    font-size:16px
+}
+button:hover{opacity:.85}
+pre{
+    background:#05070b;
+    padding:16px;
+    border-radius:12px;
+    overflow:auto;
+    margin-top:12px;
+    position:relative
+}
+code{
+    color:#c7f3ff;
+    font-family:Consolas,monospace;
+    font-size:14px;
+    white-space:pre
+}
+.copy{
+    position:absolute;
+    top:10px;
+    right:10px;
+    background:#1f2937;
+    color:#fff;
+    font-size:14px;
+    padding:6px 10px;
+    border-radius:8px
+}
+.copy.copied{
+    background:#4cff4c;
+    color:#000
+}
+</style>
+</head>
+
+<body>
+
+<h1>hey criar atmosfera no roblox?</h1>
+<p>
+Eu sei criar esse tipo de coisa é super complexo mas o <b>joaopk85</b> criou esse guia para te ajudar.
+Muitos jogos usam esse sistema ou parecido isso agrada qualquer usuário na plataforma.
+</p>
+
+<div class="box">
+    <h3>- Nome</h3>
+    <label>Nome da parte (área)</label>
+    <input id="partName" value="part123">
+</div>
+
+<div class="box">
+    <h3>[ ✓ ] título & descrição</h3>
+
+    <label>Título</label>
+    <input id="titleText" value="FLOREST">
+
+    <label>Cor do título</label>
+    <input id="titleColor" type="color" value="#00ff00">
+
+    <label>Descrição</label>
+    <input id="descText" value="área verdejante">
+
+    <label>Tempo na tela (segundos)</label>
+    <input id="timeText" type="number" value="2.3" step="0.1">
+</div>
+
+<div class="box">
+    <h3>[ ✓ ] atmosfera de fundo</h3>
+    <label>Cor da atmosfera</label>
+    <input id="atmColor" type="color" value="#00ff00">
+</div>
+
+<button onclick="generate()">★ Gerar ★</button>
+
+<pre>
+<button class="copy" id="copyBtn" onclick="copyCode()">📋 Copiar</button>
+<code id="output">-- seu script vai aparecer aqui</code>
+</pre>
+
+<script>
+function generate(){
+const part=partName.value
+const title=titleText.value
+const desc=descText.value
+const time=timeText.value
+const tc=titleColor.value
+const ac=atmColor.value
+
+const script=`local Players=game:GetService("Players")
+local TweenService=game:GetService("TweenService")
+local RunService=game:GetService("RunService")
+
+local player=Players.LocalPlayer
+local part=workspace:WaitForChild("${part}")
+
+local inside=false
+local textRunning=false
+local forceExitText=false
+local atmosphereGui
+local overlay
+
+local function createAtmosphere()
+	if atmosphereGui then return end
+	atmosphereGui=Instance.new("ScreenGui")
+	atmosphereGui.IgnoreGuiInset=true
+	atmosphereGui.ResetOnSpawn=false
+	atmosphereGui.Parent=player.PlayerGui
+
+	overlay=Instance.new("Frame")
+	overlay.Size=UDim2.new(1,0,1,0)
+	overlay.Position=UDim2.new(0,0,0,0)
+	overlay.BackgroundColor3=Color3.fromRGB(
+		${parseInt(ac.substr(1,2),16)},
+		${parseInt(ac.substr(3,2),16)},
+		${parseInt(ac.substr(5,2),16)}
+	)
+	overlay.BackgroundTransparency=1
+	overlay.BorderSizePixel=0
+	overlay.Parent=atmosphereGui
+
+	TweenService:Create(overlay,TweenInfo.new(.5),
+		{BackgroundTransparency=.95}):Play()
+end
+
+local function removeAtmosphere()
+	if not atmosphereGui then return end
+	local t=TweenService:Create(overlay,TweenInfo.new(.5),
+		{BackgroundTransparency=1})
+	t:Play()
+	t.Completed:Wait()
+	atmosphereGui:Destroy()
+	atmosphereGui=nil
+end
+
+local function showText()
+	if textRunning then return end
+	textRunning=true
+	forceExitText=false
+
+	local gui=Instance.new("ScreenGui")
+	gui.ResetOnSpawn=false
+	gui.Parent=player.PlayerGui
+
+	local title=Instance.new("TextLabel")
+	title.Size=UDim2.fromScale(1,.08)
+	title.Position=UDim2.fromScale(0,-.25)
+	title.BackgroundTransparency=1
+	title.TextTransparency=1
+	title.Text="${title}"
+	title.TextScaled=true
+	title.Font=Enum.Font.GothamBlack
+	title.TextColor3=Color3.fromRGB(
+		${parseInt(tc.substr(1,2),16)},
+		${parseInt(tc.substr(3,2),16)},
+		${parseInt(tc.substr(5,2),16)}
+	)
+	title.Parent=gui
+
+	local sub=Instance.new("TextLabel")
+	sub.Size=UDim2.fromScale(1,.045)
+	sub.Position=UDim2.fromScale(0,-.15)
+	sub.BackgroundTransparency=1
+	sub.TextTransparency=1
+	sub.Text="${desc}"
+	sub.TextScaled=true
+	sub.Font=Enum.Font.Gotham
+	sub.TextColor3=Color3.new(1,1,1)
+	sub.Parent=gui
+
+	TweenService:Create(title,TweenInfo.new(.45),
+		{Position=UDim2.fromScale(0,.03),TextTransparency=0}):Play()
+	TweenService:Create(sub,TweenInfo.new(.45),
+		{Position=UDim2.fromScale(0,.1),TextTransparency=0}):Play()
+
+	local elapsed=0
+	while elapsed<${time} do
+		if forceExitText then break end
+		elapsed+=RunService.Heartbeat:Wait()
+	end
+
+	TweenService:Create(title,TweenInfo.new(.45),
+		{Position=UDim2.fromScale(0,-.25),TextTransparency=1}):Play()
+	TweenService:Create(sub,TweenInfo.new(.45),
+		{Position=UDim2.fromScale(0,-.15),TextTransparency=1}):Play()
+
+	task.wait(.5)
+	gui:Destroy()
+	textRunning=false
+end
+
+RunService.Heartbeat:Connect(function()
+	local c=player.Character
+	if not c then return end
+	local hrp=c:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+
+	local r=part.CFrame:PointToObjectSpace(hrp.Position)
+	local s=part.Size/2
+
+	local isInside=
+		math.abs(r.X)<=s.X and
+		math.abs(r.Y)<=s.Y and
+		math.abs(r.Z)<=s.Z
+
+	if isInside and not inside then
+		inside=true
+		createAtmosphere()
+		showText()
+	elseif not isInside and inside then
+		inside=false
+		forceExitText=true
+		removeAtmosphere()
+	end
+end)`
+document.getElementById("output").textContent=script
+}
+
+function copyCode(){
+	const text=document.getElementById("output").textContent
+	const temp=document.createElement("textarea")
+	temp.value=text
+	document.body.appendChild(temp)
+	temp.select()
+	temp.setSelectionRange(0,999999)
+	document.execCommand("copy")
+	document.body.removeChild(temp)
+
+	const b=document.getElementById("copyBtn")
+	b.textContent="✔ Copiado"
+	b.classList.add("copied")
+	setTimeout(()=>{
+		b.textContent="📋 Copiar"
+		b.classList.remove("copied")
+	},1500)
+}
+</script>
+
+</body>
+</html>
